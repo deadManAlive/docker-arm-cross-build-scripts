@@ -246,6 +246,7 @@ COPY --from=gtest-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=gtest-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
 
 # TODO: install Python to /usr/local instead of ~/.local
+ENV PATH="/home/develop/.local/bin:${PATH}"
 USER root
 RUN echo "/home/develop/.local/lib" > /etc/ld.so.conf.d/home.local.conf \
  && ldconfig
