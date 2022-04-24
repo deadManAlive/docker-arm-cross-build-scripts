@@ -3,7 +3,11 @@
 set -ex
 
 # Download
-version=6.3
+version=6.2
+# I explicitly downgraded from 6.3 to 6.2 because the pkg-config libdir
+# discovery in 6.3 is broken, and the ncurses maintainer does not seem willing
+# to address this:
+# https://lists.gnu.org/archive/html/bug-ncurses/2021-10/msg00050.html
 URL="https://ftp.gnu.org/gnu/ncurses/ncurses-$version.tar.gz"
 pushd "${DOWNLOADS}"
 wget -N "$URL"
