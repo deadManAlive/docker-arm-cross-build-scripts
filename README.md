@@ -1,8 +1,7 @@
 # Docker ARM Cross Build Scripts
 
-This repository contains all you need to develop and cross-compile C++ applications for the Raspberry Pi (both 32 and 64 bit).
-
-It cross-compiles many useful libraries and tools:
+This repository contains Dockerfiles and scripts to cross-compile common 
+C and C++ libraries and programs for the Raspberry Pi (both 32 and 64 bit):
 
  - **Zlib**: compression library (OpenSSL and Python dependency)
  - **OpenSSL**: cryptography library (Python dependency)
@@ -67,8 +66,8 @@ Crosstool-NG is used to build a modern GCC toolchain that runs on your computer 
 This is much faster than compiling everything on the Pi itself.
 
 The toolchain is built by the 
-[**tttapa/docker-arm-cross-toolchain**](https://github.com/tttapa/docker-arm-cross-toolchain) repository. Instructions on how to customize the
-toolchain can be found on the [Building the Cross-Compilation Toolchain](https://tttapa.github.io/Pages/Raspberry-Pi/C++-Development/Building-The-Toolchain.html)
+[**tttapa/docker-arm-cross-toolchain**](https://github.com/tttapa/docker-arm-cross-toolchain) repository.  
+Instructions on how to customize the toolchain can be found on the [Building the Cross-Compilation Toolchain](https://tttapa.github.io/Pages/Raspberry-Pi/C++-Development/Building-The-Toolchain.html)
 page of the documentation.
 
 ### Cross-compiling the necessary libraries
