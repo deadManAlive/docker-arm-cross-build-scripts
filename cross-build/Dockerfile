@@ -2,7 +2,7 @@ ARG CROSS_TOOLCHAIN_IMAGE
 
 FROM ghcr.io/tttapa/docker-arm-cross-toolchain:${CROSS_TOOLCHAIN_IMAGE} as cross-toolchain
 
-FROM tttapa/rpi-cpp-toolchain-base-ubuntu as build
+FROM tttapa/rpi-cpp-toolchain-base-ubuntu as build-base
 
 ARG HOST_ARCH
 ARG HOST_TRIPLE
@@ -49,6 +49,8 @@ ENV PATH="/home/develop/tools:${PATH}"
 
 # Zlib, OpenSSL, Python dependencies 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM build-base AS python-deps-build
 
 # Zlib build
 COPY --chown=develop:develop install-scripts/zlib-build.sh .
@@ -104,6 +106,8 @@ RUN chmod +x uuid.sh && ./uuid.sh
 
 # Userland, FFmpeg, ...
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM build-base AS video-build
  
 # Raspberry Pi Userland (VideoCore)
 COPY install-scripts/${HOST_TRIPLE}.userland.cmake .
@@ -129,6 +133,8 @@ RUN chmod +x ffmpeg.sh && ./ffmpeg.sh
 # X11
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+FROM build-base AS x11-build
+
 # X11 ARM
 COPY --chown=develop:develop install-scripts/x11.sh .
 COPY --chown=develop:develop patches/libx11-1.6.9.configure.ac.patch .
@@ -144,11 +150,21 @@ RUN chmod +x tk.sh && ./tk.sh
 # Python
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+FROM build-base AS python-build
+
+COPY --from=python-deps-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
+COPY --from=python-deps-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+COPY --from=python-deps-build --chown=develop /home/develop/.local /home/develop/.local
+
+COPY --from=x11-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
+COPY --from=x11-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+
 # Configure LD so it finds libffi.so.7
 USER root
 RUN echo "/home/develop/.local/lib" > /etc/ld.so.conf.d/home.local.conf \
  && ldconfig
 USER develop
+RUN ls -lah /home/develop/.local
 RUN ln -s /usr/lib/ssl /home/develop/.local/ssl
 
 # Python build
@@ -162,6 +178,8 @@ RUN chmod +x python.sh && ./python.sh
 
 # NumPy, SciPy, OpenCV
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM python-build AS scipy-build
 
 # OpenBLAS ARM
 COPY --chown=develop:develop install-scripts/openblas.sh .
@@ -187,6 +205,14 @@ RUN . crossenv/bin/activate && patch "$VIRTUAL_ENV/../build/lib/python3.10/site-
 COPY --chown=develop:develop install-scripts/scipy.sh .
 RUN chmod +x scipy.sh && ./scipy.sh
 
+# OpenCV
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM scipy-build AS opencv-build
+
+COPY --from=video-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+COPY --from=video-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
+
 # OpenCV ARM
 COPY --chown=develop:develop install-scripts/opencv.sh .
 RUN chmod +x opencv.sh && ./opencv.sh
@@ -198,12 +224,28 @@ RUN rm -rf crossenv/cross/lib/python3.10/site-packages/__pycache__ && \
 
 # GoogleTest
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM build-base AS gtest-build
+
 COPY --chown=develop:develop install-scripts/${HOST_TRIPLE}.cmake .
 COPY --chown=develop:develop install-scripts/googletest.sh .
 RUN chmod +x googletest.sh && ./googletest.sh
 
 # System libraries
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM build-base AS build
+
+COPY --from=python-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
+COPY --from=python-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+
+COPY --from=opencv-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
+COPY --from=opencv-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+
+COPY --from=gtest-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
+COPY --from=gtest-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+
+COPY --chown=develop:develop install-scripts/${HOST_TRIPLE}.cmake .
 
 # Copy gdbserver to the staging area, as well as the latest C++ and Fortran 
 # libraries, OpenMP ...
@@ -225,6 +267,9 @@ RUN mkdir -p "${RPI_STAGING}/usr/local/lib/${HOST_TRIPLE_LIB_DIR}/" && \
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FROM build as developer-build
+
+COPY --from=scipy-build --chown=develop /home/develop/.local /home/develop/.local
+COPY --from=scipy-build --chown=develop /home/develop/crossenv /home/develop/crossenv
 
 # DistCC ARM
 COPY --chown=develop:develop install-scripts/distcc.sh .
