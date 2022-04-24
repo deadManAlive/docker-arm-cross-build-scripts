@@ -24,7 +24,7 @@ pushd cmake-$version
 make -j$(($(nproc) * 2))
 
 # Install
-make install DESTDIR="${RPI_STAGING}"
+cmake --install .
 
 # Cleanup
 popd
