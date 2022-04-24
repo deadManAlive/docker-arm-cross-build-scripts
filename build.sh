@@ -128,7 +128,7 @@ if [ $build = true ]; then
     . env/$target.env
     build_args=$(python3 ./env/env2arg.py env/$target.env)
     pushd cross-build
-    docker build \
+    docker buildx build \
         --tag $image \
         ${build_args} \
         --target $docker_target \
