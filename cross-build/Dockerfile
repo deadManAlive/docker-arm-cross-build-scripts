@@ -236,14 +236,20 @@ RUN chmod +x googletest.sh && ./googletest.sh
 
 FROM build-base AS build
 
-COPY --from=python-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
-COPY --from=python-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+COPY --from=opencv-build --chown=develop /home/develop/crossenv /home/develop/crossenv
+COPY --from=opencv-build --chown=develop /home/develop/.local /home/develop/.local
 
 COPY --from=opencv-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=opencv-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
 
 COPY --from=gtest-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=gtest-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
+
+# TODO: install Python to /usr/local instead of ~/.local
+USER root
+RUN echo "/home/develop/.local/lib" > /etc/ld.so.conf.d/home.local.conf \
+ && ldconfig
+USER develop
 
 COPY --chown=develop:develop install-scripts/${HOST_TRIPLE}.cmake .
 
