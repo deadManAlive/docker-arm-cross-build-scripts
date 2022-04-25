@@ -259,6 +259,8 @@ RUN mkdir -p "${RPI_STAGING}/usr/local/lib/${HOST_TRIPLE_LIB_DIR}/" && \
         "$TOOLCHAIN_PATH/${HOST_TRIPLE}/debug-root/usr/bin/gdbserver" \
         "${RPI_STAGING}/usr/local/bin"
 
+RUN sudo ldconfig
+
 # Development build
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
