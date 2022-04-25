@@ -16,7 +16,8 @@ RUN apt-get update && \
 # Add a user called `develop`, and add him to the sudo group
 RUN useradd -m develop && \
     echo "develop:develop" | chpasswd && \
-    adduser develop sudo
+    adduser develop sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER develop
 WORKDIR /home/develop
