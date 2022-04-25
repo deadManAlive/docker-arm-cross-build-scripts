@@ -9,12 +9,14 @@ ARG HOST_TRIPLE
 ARG HOST_TRIPLE_NO_VENDOR
 ARG HOST_TRIPLE_LIB_DIR
 ARG HOST_BITNESS
+ARG HOST_PYTHON_MACHINE
 
 ENV HOST_ARCH ${HOST_ARCH}
 ENV HOST_TRIPLE ${HOST_TRIPLE}
 ENV HOST_TRIPLE_NO_VENDOR ${HOST_TRIPLE_NO_VENDOR}
 ENV HOST_TRIPLE_LIB_DIR ${HOST_TRIPLE_LIB_DIR}
 ENV HOST_BITNESS ${HOST_BITNESS}
+ENV HOST_PYTHON_MACHINE ${HOST_PYTHON_MACHINE}
 
 ENV TOOLCHAIN_PATH="/home/develop/x-tools/${HOST_TRIPLE}"
 ENV PATH="${PATH}:${TOOLCHAIN_PATH}/bin"
@@ -46,6 +48,9 @@ RUN mkdir -p ${RPI_SYSROOT}/usr/local && \
 # Copy the cross-compilation pkg-config wrappers
 COPY --chown=develop:develop tools/ ./tools/
 ENV PATH="/home/develop/tools:${PATH}"
+
+# Create a symlink for /usr/local/lib64
+RUN sudo ln -s lib /usr/local/lib64
 
 # Zlib, OpenSSL, Python dependencies 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,23 +159,16 @@ FROM build-base AS python-build
 
 COPY --from=python-deps-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=python-deps-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
-COPY --from=python-deps-build --chown=develop /home/develop/.local /home/develop/.local
+COPY --from=python-deps-build /usr/local /usr/local
 
 COPY --from=x11-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=x11-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
 
-# Configure LD so it finds libffi.so.7
-USER root
-RUN echo "/home/develop/.local/lib" > /etc/ld.so.conf.d/home.local.conf \
- && ldconfig
-USER develop
-RUN ls -lah /home/develop/.local
-RUN ln -s /usr/lib/ssl /home/develop/.local/ssl
+RUN sudo ldconfig
 
 # Python build
 COPY --chown=develop:develop install-scripts/python-build.sh .
 RUN chmod +x python-build.sh && ./python-build.sh
-ENV PATH="/home/develop/.local/bin:${PATH}"
 
 # Python ARM
 COPY --chown=develop:develop install-scripts/python.sh .
@@ -187,8 +185,6 @@ RUN chmod +x openblas.sh && ./openblas.sh
 
 # Install NumPy and Crossenv on build
 RUN python3.10 -m pip install crossenv
-ARG HOST_PYTHON_MACHINE
-ENV HOST_PYTHON_MACHINE ${HOST_PYTHON_MACHINE}
 RUN python3.10 -m crossenv \
     --machine ${HOST_PYTHON_MACHINE} \
     "${RPI_SYSROOT}/usr/local/bin/python3.10" crossenv
@@ -237,20 +233,13 @@ RUN chmod +x googletest.sh && ./googletest.sh
 FROM build-base AS build
 
 COPY --from=opencv-build --chown=develop /home/develop/crossenv /home/develop/crossenv
-COPY --from=opencv-build --chown=develop /home/develop/.local /home/develop/.local
+COPY --from=opencv-build /usr/local /usr/local
 
 COPY --from=opencv-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=opencv-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
 
 COPY --from=gtest-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=gtest-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
-
-# TODO: install Python to /usr/local instead of ~/.local
-ENV PATH="/home/develop/.local/bin:${PATH}"
-USER root
-RUN echo "/home/develop/.local/lib" > /etc/ld.so.conf.d/home.local.conf \
- && ldconfig
-USER develop
 
 COPY --chown=develop:develop install-scripts/${HOST_TRIPLE}.cmake .
 
@@ -275,7 +264,7 @@ RUN mkdir -p "${RPI_STAGING}/usr/local/lib/${HOST_TRIPLE_LIB_DIR}/" && \
 
 FROM build as developer-build
 
-COPY --from=scipy-build --chown=develop /home/develop/.local /home/develop/.local
+COPY --from=scipy-build /usr/local /usr/local
 COPY --from=scipy-build --chown=develop /home/develop/crossenv /home/develop/crossenv
 
 # DistCC ARM

@@ -3,15 +3,15 @@
 set -ex
 
 # Download
-version=1_1_1n
-URL="https://github.com/openssl/openssl/archive/OpenSSL_$version.tar.gz"
+version=openssl-3.0.2
+URL="https://github.com/openssl/openssl/archive/$version.tar.gz"
 pushd "${DOWNLOADS}"
 wget -N "$URL"
 popd
 
 # Extract
-tar xzf "${DOWNLOADS}/OpenSSL_$version.tar.gz"
-pushd openssl-OpenSSL_$version
+tar xzf "${DOWNLOADS}/$version.tar.gz"
+pushd openssl-$version
 
 # Determine the architecture
 case "${HOST_TRIPLE}" in
@@ -22,15 +22,14 @@ esac
 
 # Configure
 . cross-pkg-config
-CPPFLAGS="--sysroot=${RPI_SYSROOT} " \
-LDFLAGS="--sysroot=${RPI_SYSROOT} " \
 ./Configure \
     --prefix="/usr/local" \
     --cross-compile-prefix="${HOST_TRIPLE}-" \
     --release \
-    "${OPENSSL_ARCH}"
-# Setting CFLAGS seems to mess up the configure script, so it doesn't pass the
-# optimization options to the compiler
+    --with-zlib-include="${RPI_SYSROOT}/usr/include" \
+    --with-zlib-lib="${RPI_SYSROOT}/usr/lib" \
+    "${OPENSSL_ARCH}" \
+    "--sysroot=${RPI_SYSROOT}"
 
 # Build
 make -j$(($(nproc) * 2))
@@ -41,4 +40,4 @@ make install_sw DESTDIR="${RPI_STAGING}"
 
 # Cleanup
 popd
-rm -rf openssl-OpenSSL_$version
+rm -rf openssl-$version

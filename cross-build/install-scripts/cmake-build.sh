@@ -9,8 +9,8 @@ pushd "${DOWNLOADS}"
 wget -N "$URL"
 
 chmod +x cmake-$version-Linux-x86_64.sh
-./cmake-$version-Linux-x86_64.sh \
-    --prefix="$HOME/.local" \
+sudo ./cmake-$version-Linux-x86_64.sh \
+    --prefix="/usr/local" \
     --exclude-subdir \
     --skip-license
 

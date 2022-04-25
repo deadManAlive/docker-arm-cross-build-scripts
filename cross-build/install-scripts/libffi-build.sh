@@ -16,13 +16,13 @@ pushd libffi-$version
 # Configure
 ./autogen.sh
 ./configure \
-    --prefix="$HOME/.local" \
+    --prefix="/usr/local" \
 
 # Build
 make -j$(($(nproc) * 2))
 
 # Install
-make install
+sudo make install
 
 # Cleanup
 popd

@@ -14,13 +14,13 @@ pushd zlib-1.2.11
 
 # Configure
 ./configure \
-    --prefix="$HOME/.local"
+    --prefix="/usr/local"
 
 # Build
 make -j$(($(nproc) * 2))
 
 # Install
-make install
+sudo make install
 
 # Cleanup
 popd
