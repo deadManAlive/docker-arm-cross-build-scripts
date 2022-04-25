@@ -103,12 +103,14 @@ build=true
 push=false
 export=false
 docker_build_cpuset=
+buildx=
 
 while (( "$#" )); do
     case "$1" in
         --push)             push=true                            ;;
         --pull)             build=false                          ;;
         --export)           export=true                          ;;
+        --buildx)           buildx=buildx                        ;;
         --cpuset-cpus=*)    docker_build_cpuset="$1"             ;;
         *) echo; echo "Unknown option '$1'"; print_usage; exit 1 ;;
     esac
@@ -134,7 +136,7 @@ if [ $build = true ]; then
     . env/$target.env
     build_args=$(python3 ./env/env2arg.py env/$target.env)
     pushd cross-build
-    docker buildx build \
+    docker $buildx build \
         --tag $image \
         ${build_args} \
         --target $docker_target \
