@@ -44,6 +44,9 @@ function print_usage {
     echo "    --export"
     echo "        Export the toolchain, sysroot and staging area to your computer"
     echo
+    echo "    --buildx"
+    echo "        Build the image using docker buildx"
+    echo
 }
 
 # Check the number of arguments
