@@ -7,34 +7,37 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 function print_usage {
     echo
     echo "Usage"
-    echo "    $0 <board> [--push] [--pull] [--export]"
+    echo "    $0 <board> [--dev] [--push] [--pull] [--export] [--buildx]"
     echo
     echo "Boards"
     echo "    rpi"
-    echo "        Raspberry Pi 1, 32-bit, without development tools."
+    echo "        Raspberry Pi 1, 32-bit."
     echo "        Recommended for: RPi A/B/A+/B+, CM 1, RPi Zero/Zero W"
-    echo
-    echo "    rpi-dev"
-    echo "        Raspberry Pi 1, 32-bit, with development tools."
-    echo "        Recommended for: RPi A/B/A+/B+, CM 1, RPi Zero/Zero W"
+#    echo
+#    echo "    rpi-dev"
+#    echo "        Raspberry Pi 1, 32-bit, with development tools."
+#    echo "        Recommended for: RPi A/B/A+/B+, CM 1, RPi Zero/Zero W"
     echo
     echo "    rpi3-armv8"
-    echo "        Raspberry Pi 3, 32-bit, without development tools"
-    echo "        Use for: RPi 2B rev. 1.2, RPi 3B/3B+, CM 3, RPi 4B/400, CM 4, RPi Zero 2 W"
-    echo 
-    echo "    rpi3-armv8-dev"
-    echo "        Raspberry Pi 3, 32-bit, with development tools"
+    echo "        Raspberry Pi 3, 32-bit."
     echo "        Recommended for: RPi 2B rev. 1.2, RPi 3B/3B+, CM 3, RPi 4B/400, CM 4, RPi Zero 2 W"
+#    echo 
+#    echo "    rpi3-armv8-dev"
+#    echo "        Raspberry Pi 3, 32-bit, with development tools"
+#    echo "        Recommended for: RPi 2B rev. 1.2, RPi 3B/3B+, CM 3, RPi 4B/400, CM 4, RPi Zero 2 W"
     echo
     echo "    rpi3-aarch64"
-    echo "        Raspberry Pi 3, 64-bit, without development tools"
+    echo "        Raspberry Pi 3, 64-bit."
     echo "        Recomended for: RPi 2B rev. 1.2, RPi 3B/3B+, CM 3, RPi 4B/400, CM 4, RPi Zero 2 W"
-    echo
-    echo "    rpi3-aarch64-dev"
-    echo "        Raspberry Pi 3, 64-bit, with development tools"
-    echo "        Recomended for: RPi 2B rev. 1.2, RPi 3B/3B+, CM 3, RPi 4B/400, CM 4, RPi Zero 2 W"
+#    echo
+#    echo "    rpi3-aarch64-dev"
+#    echo "        Raspberry Pi 3, 64-bit, with development tools"
+#    echo "        Recomended for: RPi 2B rev. 1.2, RPi 3B/3B+, CM 3, RPi 4B/400, CM 4, RPi Zero 2 W"
     echo
     echo "Options"
+    echo "    --dev"
+    echo "        Cross-compile the development tools as well (e.g. distcc, ccache, CMake, Git, Ninja, Make)"
+    echo
     echo "    --push"
     echo "        After building, push the resulting image to Docker Hub"
     echo
@@ -115,6 +118,7 @@ while (( "$#" )); do
         --export)           export=true                          ;;
         --buildx)           buildx=buildx                        ;;
         --cpuset-cpus=*)    docker_build_cpuset="$1"             ;;
+        --dev)              dev=dev                              ;;
         *) echo; echo "Unknown option '$1'"; print_usage; exit 1 ;;
     esac
     shift
