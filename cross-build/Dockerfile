@@ -227,6 +227,19 @@ COPY --chown=develop:develop install-scripts/${HOST_TRIPLE}.cmake .
 COPY --chown=develop:develop install-scripts/googletest.sh .
 RUN chmod +x googletest.sh && ./googletest.sh
 
+# CMake & Ninja
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM build-base AS cmake-build
+
+# CMake build
+COPY --chown=develop:develop install-scripts/cmake-build.sh .
+RUN chmod +x cmake-build.sh && ./cmake-build.sh
+
+# Ninja build
+COPY --chown=develop:develop install-scripts/ninja-build.sh .
+RUN chmod +x ninja-build.sh && ./ninja-build.sh
+
 # System libraries
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -234,6 +247,8 @@ FROM build-base AS build
 
 COPY --from=opencv-build --chown=develop /home/develop/crossenv /home/develop/crossenv
 COPY --from=opencv-build /usr/local /usr/local
+
+COPY --from=cmake-build /usr/local /usr/local
 
 COPY --from=opencv-build --chown=develop ${RPI_SYSROOT} ${RPI_SYSROOT}
 COPY --from=opencv-build --chown=develop ${RPI_STAGING} ${RPI_STAGING}
@@ -293,10 +308,6 @@ RUN chmod +x curl.sh && ./curl.sh
 # Git ARM
 COPY --chown=develop:develop install-scripts/git.sh .
 RUN chmod +x git.sh && ./git.sh
-
-# CMake build
-COPY --chown=develop:develop install-scripts/cmake-build.sh .
-RUN chmod +x cmake-build.sh && ./cmake-build.sh
 
 # Ninja ARM
 COPY --chown=develop:develop install-scripts/ninja.sh .

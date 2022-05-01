@@ -15,5 +15,11 @@ sudo ./cmake-$version-Linux-$arch.sh \
     --exclude-subdir \
     --skip-license
 
+# CMake installer overwrites the man folder (which should be a symlink), so 
+# fix that here.
+sudo mv "/usr/local/man/"* "/usr/local/share/man/"
+sudo rmdir "/usr/local/man"
+sudo ln -s "share/man" "/usr/local/man"
+
 rm cmake-$version-Linux-$arch.sh
 popd
