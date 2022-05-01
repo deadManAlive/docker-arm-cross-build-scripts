@@ -22,15 +22,17 @@ pushd git-$version
 . cross-pkg-config
 make configure
 ./configure \
-    --with-curl \
-    --with-openssl \
+    --with-curl="${RPI_SYSROOT}" \
+    --with-openssl="${RPI_SYSROOT}" \
     --host="${HOST_TRIPLE}" \
     --prefix="/usr/local" \
     ac_cv_iconv_omits_bom=no \
     ac_cv_fread_reads_directories=yes \
     ac_cv_snprintf_returns_bogus=no \
     CFLAGS="--sysroot ${RPI_SYSROOT} -O3 \
-            -I${RPI_SYSROOT}/usr/local/include"
+            -I${RPI_SYSROOT}/usr/local/include" \
+    LDFLAGS="--sysroot ${RPI_SYSROOT} \
+            -L${RPI_SYSROOT}/usr/local/lib"
 
 # Build
 make -j$(($(nproc) * 2))
