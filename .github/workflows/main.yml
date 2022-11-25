@@ -1,15 +1,24 @@
-name: build-and-export
+name: Build and Export (rpi3-armv8)
 
 on: workflow_dispatch
 
 jobs:
-  build:
+  build-and-export:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: one line
-        run:  echo Hello, World!
-      - name: multi line
-        run:  cat README.md
-
+      - name: build process
+        run:  ./build.sh rpi3-arm --export
+      - name: archive syroot
+        run:  |
+          sysroot=$(echo sysroot-*)
+          tar cf $sysroot.tar $sysroot
+      - name: archive x-tools
+        run:  |
+          tar cf x-tools.tar x-tools
+      - name: export artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rpi3-armv8-artifacts
+          path: *.tar
     
