@@ -1,0 +1,17 @@
+name: build-and-export
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: one line
+        run:  echo Hello, World!
+      - name: multi line
+        run:  |
+          echo Hello,
+          echo World!
+
+    
