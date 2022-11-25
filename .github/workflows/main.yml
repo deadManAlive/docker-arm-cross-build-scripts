@@ -10,8 +10,6 @@ jobs:
       - name: one line
         run:  echo Hello, World!
       - name: multi line
-        run:  |
-          echo Hello,
-          echo World!
+        run:  cat README.md
 
     
