@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: build process
-        run:  ./build.sh rpi3-arm --export
+        run:  ./build.sh rpi3-armv8 --export
       - name: archive syroot
         run:  |
           sysroot=$(echo sysroot-*)
