@@ -14,7 +14,7 @@ C and C++ libraries and programs for the Raspberry Pi (both 32 and 64 bit):
  - **UUID**: library for unique identifiers (Python dependency)
  - **libX11**: X11 protocol client library (Tk dependency)
  - **Tcl/Tk**: graphical user interface toolkit (Python/Tkinter dependency)
- - **Python 3.10.4**: Python interpreter and libraries
+ - **Python 3.9.2**: Python interpreter and libraries
  - **ZBar**: Bar and QR code decoding library
  - **Raspberry Pi Userland**: VideoCore GPU drivers
  - **VPX**: VP8/VP9 codec SDK

@@ -10,11 +10,11 @@ set -ex
 WORKING=$PWD
 GFORTRAN=${HOST_TRIPLE}-gfortran
 
-BUILD_PYTHON=`which python3.10`
-HOST_PYTHON="${RPI_SYSROOT}/usr/local/bin/python3.10"
+BUILD_PYTHON=`which python3.9`
+HOST_PYTHON="${RPI_SYSROOT}/usr/local/bin/python3.9"
 SYSROOT="${RPI_SYSROOT}"
 
-numpy_version=1.21.6
+numpy_version=1.23.1
 NUMPY_URL=https://files.pythonhosted.org/packages/45/b7/de7b8e67f2232c26af57c205aaad29fe17754f793404f59c8a730c7a191a/numpy-1.21.6.zip
 
 
@@ -23,8 +23,8 @@ NUMPY_URL=https://files.pythonhosted.org/packages/45/b7/de7b8e67f2232c26af57c205
 . crossenv/bin/activate
 python3 -c "import os; print(os.uname())"
 
-BUILD_SITE=$PWD/crossenv/build/lib/python3.10/site-packages
-CROSS_SITE=$PWD/crossenv/cross/lib/python3.10/site-packages
+BUILD_SITE=$PWD/crossenv/build/lib/python3.9/site-packages
+CROSS_SITE=$PWD/crossenv/cross/lib/python3.9/site-packages
 
 ################################################################
 # Host-numpy
