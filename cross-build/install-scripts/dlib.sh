@@ -26,6 +26,7 @@ apt list --installed
 . crossenv/bin/activate
 pushd dlib-$version/build-arm
 cmake \
+    -DCMAKE_SYSTEM_NAME=Linux \
     -DCMAKE_C_COMPILER=${HOST_TRIPLE}-gcc \
     -DCMAKE_CXX_COMPILER=${HOST_TRIPLE}-g++ \
     -DCMAKE_SYSTEM_PROCESSOR="${HOST_ARCH}" \
@@ -59,10 +60,9 @@ pushd dlib-$version
 
 # pip install dlib==19.24.0
 
-# CC=${HOST_TRIPLE}-gcc CXX=${HOST_TRIPLE}-g++ \
-python setup.py install
-
-# pip install $(ls ./dist/dlib*.whl)1
+CC=${HOST_TRIPLE}-gcc CXX=${HOST_TRIPLE}-g++ \
+python setup.py bdist_wheel --verbose --set CMAKE_SYSTEM_NAME=Linux
+pip install $(ls ./dist/dlib*.whl)
 
 popd
 rm -rf dlib-$version
