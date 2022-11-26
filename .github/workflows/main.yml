@@ -16,9 +16,19 @@ jobs:
       - name: archive x-tools
         run:  |
           tar cf x-tools.tar x-tools
-      - name: export artifacts
+      - name: export staging
         uses: actions/upload-artifact@v3
         with:
-          name: rpi3-armv8-artifacts
-          path: "*.tar"
+          name: staging-rpi3-armv8
+          path: staging*.tar
+      - name: export sysroot
+        uses: actions/upload-artifact@v3
+        with:
+          name: sysroot-rpi3-armv8
+          path: sysroot*.tar
+      - name: export cross-tools
+        uses: actions/upload-artifact@v3
+        with:
+          name: x-tools-rpi3-armv8
+          path: x-tools.tar
     
